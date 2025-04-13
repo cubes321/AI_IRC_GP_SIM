@@ -153,7 +153,7 @@ def lap_roundup(event, connection, chan):
             output = output[:450]
             print(output)
             connection.privmsg(event.target,output)        
-            time.sleep(3)    
+            time.sleep(1)    
 
 def do_lap(event, connection, chan):
         connection.privmsg(event.target,"***** Next Lap *****")
@@ -171,7 +171,7 @@ def do_lap(event, connection, chan):
             output = output[:450]
             print(output)
             connection.privmsg(event.target,output)        
-            time.sleep(3)  
+            time.sleep(5)  
 
 def do_after_race(event, connection, chan):
         connection.privmsg(event.target,"***** AFTER THE RACE *****")
