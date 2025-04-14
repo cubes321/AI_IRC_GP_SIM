@@ -99,6 +99,9 @@ def on_message(connection, event):
         if event.arguments[0].find("!start") != -1:
             start_race(event, connection)
             return
+    if event.arguments[0].find("!qual") != -1:
+        do_qualification(event, connection)
+        return
     
 def start_race(event, connection):
 # setup race
@@ -113,9 +116,9 @@ def start_race(event, connection):
             print(output)
             connection.privmsg(event.target,output)        
             time.sleep(2)
-        time.sleep(2)
+        time.sleep(10)
         connection.privmsg(event.target,"***** RACE ABOUT TO START *****")
-        time.sleep(3)
+        time.sleep(5)
         response = chats[chan].send_message("The race starts.  Simulate lap 1.  Include the lap time, position changes, and any incidents.")
         para_text = response.text.splitlines()
         nonempty_para_text = [line for line in para_text if line.strip()]
@@ -124,16 +127,30 @@ def start_race(event, connection):
             output = output[:450]
             print(output)
             connection.privmsg(event.target,output)        
-            time.sleep(4)
-        time.sleep(2)
+            time.sleep(6)
+        time.sleep(6)
         lap_roundup(event, connection,chan)
         while True:
-            time.sleep(2)
             if do_lap(event, connection, chan) == "STOP":
                 break
             time.sleep(2)
             lap_roundup(event, connection, chan)
             time.sleep(2)
+
+def do_qualification(event, connection):
+    connection.privmsg(event.target,"***** QUALIFICATION ABOUT TO START *****")
+    chan = event.target
+    if chan in chats:
+        response = chats[chan].send_message("Describe the qualification session.  Include the track, weather, top 10 grid positions, number of laps and any other relevant details.  List the grid order and lap times.")
+        para_text = response.text.splitlines()
+        nonempty_para_text = [line for line in para_text if line.strip()]
+        for paragraph in nonempty_para_text:
+            output = remove_lfcr(paragraph)
+            output = output[:450]
+            print(output)
+            connection.privmsg(event.target,output)        
+            time.sleep(3)
+        time.sleep(2)
 
 def remove_lfcr(text):
     return text.replace("\n"," ").replace("\r"," ")
@@ -154,10 +171,11 @@ def lap_roundup(event, connection, chan):
             print(output)
             connection.privmsg(event.target,output)        
             time.sleep(1)    
+        time.sleep(10)
 
 def do_lap(event, connection, chan):
         connection.privmsg(event.target,"***** Next Lap *****")
-        time.sleep(3)
+        time.sleep(5)
         response = chats[chan].send_message("Give the current lap number and Simulate the lap continuing from the previous one.  Include the lap time, position changes, and any incidents.  If the race has finished only reply with STOP")
         end_race = response.text.splitlines()
         if end_race[0].find("STOP") != -1: 
@@ -171,7 +189,7 @@ def do_lap(event, connection, chan):
             output = output[:450]
             print(output)
             connection.privmsg(event.target,output)        
-            time.sleep(5)  
+            time.sleep(8)  
 
 def do_after_race(event, connection, chan):
         connection.privmsg(event.target,"***** AFTER THE RACE *****")
@@ -190,6 +208,11 @@ def do_after_race(event, connection, chan):
             print(output)
             connection.privmsg(event.target,output)        
             time.sleep(3) 
+        file_path = "race.txt"
+        with open(file_path, "w") as file:
+            for messages in chats[chan].get_history():
+                if messages.parts[0].text:
+                    file.write(messages.parts[0].text + "\n")
         quit() 
 
 if __name__ == "__main__":
